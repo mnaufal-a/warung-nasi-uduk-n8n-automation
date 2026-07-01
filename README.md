@@ -158,6 +158,24 @@ Proses development workflow ini melibatkan debugging API integration yang cukup 
 
 ---
 
+## 📸 Screenshots
+
+### Order Bot + AI Agent
+![Canvas Workflow](screenshots/01-order-bot-canvas.png)
+![WhatsApp Chat](screenshots/02-order-bot-wa-chat.jpeg)
+![WhatsApp Chat](screenshots/03-order-bot-wa-chat.jpeg)
+![Google Sheets Orders](screenshots/04-order-bot-sheets.jpg)
+
+### Daily Report Bot
+![Canvas Workflow](screenshots/05-daily-report-canvas.png)
+![Laporan di WA](screenshots/06-daily-report-wa.jpeg)
+
+### Social Media Scheduler
+![Canvas Workflow](screenshots/07-scheduler-canvas.png)
+![Telegram Channel](screenshots/08-scheduler-telegram.png)
+![WA Group Broadcast](screenshots/09-scheduler-wa-group.png)
+![Google Sheets Scheduler](screenshots/10-scheduler-sheets.png)
+
 ## ⚙️ Setup & Konfigurasi
 
 ### Prerequisites
