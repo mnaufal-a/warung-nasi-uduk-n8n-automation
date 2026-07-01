@@ -1,0 +1,985 @@
+{
+  "name": "Order Bot + AI agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-order-bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -800,
+        32
+      ],
+      "id": "b57caf81-8e60-4302-9c11-28e8519ef170",
+      "name": "Webhook",
+      "webhookId": "c35a3828-ca39-476e-a9cb-28f1a43cbc0c"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "ok",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        320,
+        -160
+      ],
+      "id": "d17306a0-930b-464c-8af9-fdaac777b683",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -256,
+        16
+      ],
+      "id": "ca9c89ff-3401-4b7c-a6c2-038eb482134b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4ad5dfb7-e420-4d94-b1f0-91b819065c58",
+              "name": "balasan",
+              "value": "=Halo {{ $json.body.name }}! 👋  \nIni menu kami hari ini: \n🍛 Nasi Uduk - Rp 8.000 \n🥘 Lontong sayur  - Rp 10.000 \n🍟 Gorengan - Rp 2.000  \n\nUntuk order, \nketik: *pesan [nama menu] [jumlah]* \nContoh: pesan nasi uduk 2",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        -848
+      ],
+      "id": "d16a17b4-7701-4fad-8d55-8d0ba84585b4",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51e9c0b0-08a4-4a63-b2a1-04e3f46f31e6",
+              "name": "balasan",
+              "value": "=Oke {{ $json.body.name }}! Pesananmu sedang kami proses.  Kami akan konfirmasi segera ya! 🙏",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        48
+      ],
+      "id": "80351bbf-0c33-42e9-818b-21887e6ef2b6",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fe4ec219-f8a5-4e80-bded-1dbb92dc9137",
+              "name": "balasan",
+              "value": "=Halo {{ $json.body.name }}! 👋 Selamat datang!\n\nKetik *menu* untuk melihat daftar menu kami.\nKetik *pesan [nama menu] [jumlah]* untuk order.\n\nContoh: pesan nasi goreng 2",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        1024
+      ],
+      "id": "8c56c028-6d9f-4c68-90d4-05df8645374a",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_URL_HERE",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Nama": "={{ $('Webhook').item.json.body.name }}",
+            "Nomor WA": "={{ $('Webhook').item.json.body.sender }}",
+            "Pesanan": "={{ $('Webhook').item.json.body.pesan }}",
+            "Status": "Baru",
+            "Total Harga": "={{ $json.totalHarga }}",
+            "Jumlah Item": "={{ $('Code in JavaScript').item.json.jumlahPesan }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nama",
+              "displayName": "Nama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nomor WA",
+              "displayName": "Nomor WA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pesanan",
+              "displayName": "Pesanan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Jumlah Item",
+              "displayName": "Jumlah Item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Harga",
+              "displayName": "Total Harga",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        64
+      ],
+      "id": "2dd7feec-ea16-4f50-9cbe-6722af2c1153",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fonnte.com/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_FONNTE_TOKEN_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "YOUR_OWNER_WHATSAPP_NUMBER_HERE"
+            },
+            {
+              "name": "message",
+              "value": "=🔔 ORDER BARU MASUK! \n👤 Customer: {{ $('Webhook').item.json.body.name }}  \n📱 Nomor: {{ $('Webhook').item.json.body.sender }}  \n🛒 Pesanan: {{ $('Webhook').item.json.body.pesan }}  \n🕐 Waktu: {{ $now.setZone('Asia/Jakarta').toFormat('dd/MM/yyyy HH:mm') }}    \n\nSegera konfirmasi ke customer ya! 💪"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1200,
+        64
+      ],
+      "id": "312af973-14c8-4351-9577-f9075a2f0077",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fonnte.com/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_FONNTE_TOKEN_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "={{ $('Webhook').item.json.body.sender }}"
+            },
+            {
+              "name": "message",
+              "value": "=Pesanan kamu sudah kami terima! 🎉\n\n📋 Detail pesanan anda:\n\nMenu: {{ $('Code in JavaScript').item.json.detailMenu }}\n\nJumlah: {{ $('Code in JavaScript').item.json.jumlahPesan }} item\n\nTotal: {{ $('Code in JavaScript').item.json.totalHargaFormatted }}\n\nMohon ditunggu ya! 🙏"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1360,
+        64
+      ],
+      "id": "027220e4-5625-4bc5-b0b7-26296e6cfe04",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fonnte.com/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_FONNTE_TOKEN_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "={{ $('Webhook').item.json.body.sender }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('Edit Fields').item.json.balasan }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        848,
+        -832
+      ],
+      "id": "367eb03e-0d86-466b-ba36-93b034ba6b67",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fonnte.com/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_FONNTE_TOKEN_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "={{ $('Webhook').item.json.body.sender }}"
+            },
+            {
+              "name": "message",
+              "value": "=Halo, assalammualaikum {{ $json.body.name }}!  \n👋 Selamat datang! di warung kami   \n\nKetik *menu* untuk melihat daftar menu kami. "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        768,
+        1088
+      ],
+      "id": "5e6f953b-46e8-4b3c-9c5d-d8ee716938dc",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_URL_HERE",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Menu",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        576,
+        48
+      ],
+      "id": "1e1824f1-0dfb-4d07-86c4-3aba54f982bc",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil pesan dari semua items yang masuk (dari Google Sheets Menu)\n// Data webhook diambil dari node Webhook langsung\nconst pesanCustomer = $('Webhook').item.json.body.pesan || '';\n\n// Data menu dari input (semua baris sheet Menu)\nconst dataMenu = items;\n\n// Ekstrak nama menu dan jumlah dari pesan\nconst pesanLower = pesanCustomer.toLowerCase();\n\nconst bagianPesan = pesanLower.split(/\\s*(dan|,|\\+|sama|terus|juga)\\s*/i)\n  .filter(b => b.trim().length > 2); // buang kata pemisah & string pendek\n\nconst hasilOrder = [];\n\nfor (const bagian of bagianPesan) {\n  \n  // Cari menu yang cocok\n  for (const menuRow of dataMenu) {\n    const namaMenu = (menuRow.json['Nama Menu'] || '').toLowerCase();\n    \n    if (bagian.includes(namaMenu)) {\n      const angkaBagian = bagian.match(/\\d+/g);\n      const jumlah = angkaBagian ? parseInt(angkaBagian[0]) : 1;\n      const harga = parseInt(menuRow.json['Harga']) || 0;\n\n      hasilOrder.push({\n        nama: menuRow.json['Nama Menu'],\n        jumlah: jumlah,\n        hargaSatuan: harga,\n        subTotal: harga * jumlah,\n      })\n      break;\n    }\n  }\n}\n\n//buat hitung total order\nconst totalItem = hasilOrder.reduce((sum, item) => sum + item.jumlah, 0 );\nconst totalHarga = hasilOrder.reduce((sum, item) => sum + item.subTotal, 0);\n\n//ini format detailpesenan\nconst detailMenu = hasilOrder.map(item => \n  `${item.nama} x${item.jumlah} = Rp ${item.subTotal.toLocaleString('id-ID')}`  \n).join(', ');\n\nconst formatRupiah = (n) => 'Rp ' + n.toLocaleString('id-ID');\n\nreturn [{\n  json: {\n    namaMenu: hasilOrder.map(i => i.nama).join(' + '),\n    jumlahPesan: totalItem,\n    totalHarga,\n    totalHargaFormatted: formatRupiah(totalHarga),\n    detailMenu,\n    pesanAsli: pesanCustomer,\n    namaCust: $('Webhook').item.json.body.name,\n    nomorCust: $('Webhook').item.json.body.sender\n  },\n  pairedItem: { item: 0 }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        64
+      ],
+      "id": "0f0d19d1-0bb3-4280-b59e-290ef0372481",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6561a376-4d0e-4533-b952-da9301c3b75f",
+              "leftValue": "={{ $json.body.sender }}",
+              "rightValue": "={{ $json.body.device }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -592,
+        32
+      ],
+      "id": "800b6539-b384-4d83-a1a9-aa9affc68721",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.pesan }}",
+        "options": {
+          "systemMessage": "Kamu adalah Din, asisten virtual Warung Nasi Uduk Bu Neli yang ramah dan helpful.\n\nINFORMASI WARUNG:\n- Nama: Warung Nasi Uduk Bu Neli\n- Jam buka: 06.00 - 10.30 Pagi WIB\n- Lokasi: Pasar Bambu, Jatisari, Jatiasih, Kota Bekasi\n\nMENU & HARGA:\n- Nasi Uduk: Rp 8.000\n- Lontong Sayur: Rp 10.000\n- Gorengan: Rp 2.000/buah\n- Minuman: belum tersedia\n\nCARA MENJAWAB:\n- Gunakan bahasa Indonesia yang ramah dan santai\n- Kalau customer tanya menu, tampilkan menu dengan harga\n- Selalu akhiri pesan dengan emoji yang sesuai 😊\n\nALUR PEMESANAN:\nKalau customer mau pesan, kumpulkan info ini SATU PER SATU secara natural:\n1. Nama pemesan\n2. Pilihan pengambilan: ambil sendiri ke warung ATAU diantar (delivery)\n3. Kalau delivery: tanya alamat lengkap\n4. Item pesanan dan jumlahnya\n\nSetelah semua info lengkap, tampilkan ringkasan ke customer dan minta konfirmasi.\n\nSetelah customer konfirmasi (bilang \"iya\", \"ok\", \"yes\", \"bener\", \"betul\", dll), kirim pesan konfirmasi biasa ke customer, lalu di akhir pesan tambahkan blok data ini PERSIS seperti format berikut:\n\n###ORDER###\n\nNAMA: [nama pemesan]\nTIPE: [DELIVERY atau PICKUP]\nALAMAT: [alamat lengkap atau \"Ambil di warung\"]\nPESANAN: [item1 x jumlah, item2 x jumlah]\nTOTAL: [total harga]\n\n###END###\n\nPENTING: Blok ###ORDER### hanya dikirim SEKALI, yaitu setelah customer konfirmasi. Jangan kirim blok itu sebelum customer konfirmasi.\n\nGAYA KOMUNIKASI:\n- Maksimal 3-4 baris per pesan, langsung ke poin\n- Jangan ulangi info yang sudah disampaikan customer\n- Kalau customer sudah sebut nama di awal, langsung pakai namanya, jangan tanya lagi\n- Kumpulkan info yang belum ada saja, jangan tanya ulang yang sudah dijawab\n- Konfirmasi pesanan cukup sekali, tidak perlu berulang"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -64,
+        208
+      ],
+      "id": "00533868-7ccd-4c23-b780-2a1efb0dde9f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        480
+      ],
+      "id": "924e803c-7a84-4015-8182-8836badcf223",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Gemini(Generative AI) API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sender }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        464
+      ],
+      "id": "f9bee052-fdbb-4245-b638-a90adb9906d2",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fonnte.com/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_FONNTE_TOKEN_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "={{ $('Webhook').item.json.body.sender }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.output.split('###ORDER###')[0].trim() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        304,
+        368
+      ],
+      "id": "0cf7d657-6b96-41f9-a225-03f6ecfb3611",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $('AI Agent').item.json.output;\n\n// Cek apakah ada blok ORDER\nif (!output.includes('###ORDER###')) {\n  return [{ json: { hasOrder: false } }];\n}\n\n// Ekstrak blok ORDER\nconst orderBlock = output.split('###ORDER###')[1].split('###END###')[0];\nconst lines = orderBlock.trim().split('\\n');\n\n// Parse data dari blok ORDER\nconst data = {};\nfor (const line of lines) {\n  const [key, ...rest] = line.split(':');\n  if (key && rest.length) {\n    data[key.trim()] = rest.join(':').trim();\n  }\n}\n\n// Hitung jumlah item dari field PESANAN\nconst pesananText = data['PESANAN'] || '';\nlet jumlahItem = 0;\nconst itemMatches = pesananText.match(/x\\s*(\\d+)/gi);\nif (itemMatches) {\n  itemMatches.forEach(match => {\n    jumlahItem += parseInt(match.replace(/x\\s*/i, ''));\n  });\n}\n\nreturn [{\n  json: {\n    hasOrder: true,\n    nama: data['NAMA'] || '',\n    tipe: data['TIPE'] || '',\n    alamat: data['ALAMAT'] || '',\n    pesanan: data['PESANAN'] || '',\n    total: data['TOTAL'] || '',\n    jumlahItem: jumlahItem,\n    nomorWA: $('Webhook').item.json.body.sender,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        400
+      ],
+      "id": "7265b4eb-d25b-4c4b-8c1c-1c0a5fcb6e90",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "14abd4ba-c2af-4512-a76d-4fd708bc8165",
+              "leftValue": "={{ $json.hasOrder }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        704,
+        432
+      ],
+      "id": "f002967d-c0eb-4ddc-b15d-09ed5e521d37",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_URL_HERE",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEETS_URL_HERE#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Nama": "={{ $json.nama }}",
+            "Pesanan": "={{ $json.pesanan }}",
+            "Nomor WA": "={{ $json.nomorWA }}",
+            "Total Harga": "={{ $json.total }}",
+            "Status": "Baru",
+            "Jumlah Item": "={{ $json.jumlahItem }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nama",
+              "displayName": "Nama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nomor WA",
+              "displayName": "Nomor WA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Pesanan",
+              "displayName": "Pesanan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Jumlah Item",
+              "displayName": "Jumlah Item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Harga",
+              "displayName": "Total Harga",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        384
+      ],
+      "id": "e651c341-1603-4fa7-bdbb-977523911898",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fonnte.com/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_FONNTE_TOKEN_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "YOUR_OWNER_WHATSAPP_NUMBER_HERE"
+            },
+            {
+              "name": "message",
+              "value": "=🔔 ORDER BARU MASUK! \n\n👤 Customer: {{ $('Code in JavaScript1').item.json.nama }}\n📱 Nomor: {{ $('Code in JavaScript1').item.json.nomorWA }} \n🛒 Pesanan: {{ $('Code in JavaScript1').item.json.pesanan }} \n🚚 Tipe: {{ $('Code in JavaScript1').item.json.tipe }} \n📍 Alamat: {{ $('Code in JavaScript1').item.json.alamat }} \n💰 Total: {{ $('Code in JavaScript1').item.json.total }}  \n\nSegera konfirmasi ke customer ya! 💪"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1248,
+        384
+      ],
+      "id": "9e85c6b5-96e2-4e86-ae9c-02753fdce2c5",
+      "name": "HTTP Request5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e9d4c064-9501-4ebb-ba45-b416acf79548",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "id": "FXM2WckRbLFXXmOH",
+  "tags": []
+}

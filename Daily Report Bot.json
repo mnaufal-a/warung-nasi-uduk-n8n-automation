@@ -1,0 +1,153 @@
+{
+  "name": "Daily Report Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "41b9f6b7-31de-4c5c-9f2d-86c4369b5c7c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_URL_HERE",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEETS_URL_HERE"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "baf12a66-db67-42ff-add1-25a1406e3836",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = items;\n\n// Ambil tanggal kemarin\nconst kemarin = new Date();\nkemarin.setDate(kemarin.getDate() - 1);\nconst tanggalKemarin = kemarin.toISOString().split('T')[0]; // format: 2026-06-12\n\n// Filter hanya order kemarin\nconst orderKemarin = rows.filter(row => {\n  const timestamp = row.json['Timestamp'] || '';\n  return timestamp.startsWith(tanggalKemarin);\n});\n\n// Kalau tidak ada order kemarin\nif (orderKemarin.length === 0) {\n  const laporan = `📊 *LAPORAN HARIAN*\n📅 ${kemarin.toLocaleDateString('id-ID', { \n  weekday: 'long', year: 'numeric',\n  month: 'long', day: 'numeric' })}\n\nTidak ada order masuk kemarin. 😴\n\nSemangat jualan hari ini! 💪`;\n  return [{ json: { laporan, totalOrder: 0, totalItem: 0, totalPendapatan: 0, } }];\n}\n\n// Hitung total\nlet totalItem = 0;\nlet totalPendapatan = 0;\nconst detailPesanan = [];\n\n\nfor (const row of orderKemarin) {\n  const pesanan = row.json['Pesanan'] || '';\n  const nama = row.json['Nama'] || '';\n  const totalHarga = parseInt(row.json['Total Harga']) || 0;\n\n  const angka = pesanan.match(/\\d+$/);\n  const jumlah = parseInt(row.json['Jumlah Item']) || 1;\n  totalItem += jumlah;\n  totalPendapatan += totalHarga;\n\n  const hargaFormatted = 'Rp ' + totalHarga.toLocaleString('id-ID');\n  detailPesanan.push(`• ${nama}: ${pesanan} => ${hargaFormatted}`);\n}\n\nconst laporan = `📊 *LAPORAN HARIAN*\n📅 ${kemarin.toLocaleDateString('id-ID', { \n  weekday: 'long', year: 'numeric',\n  month: 'long', day: 'numeric' })}\n\n📦 Total Order: ${orderKemarin.length} pesanan\n🛒 Total Item: ${totalItem} item\n💰 Total Pendapatan: ${totalPendapatan}\n\n\n📋 *Detail Pesanan:*\n${detailPesanan.join('\\n')}\n\nSemangat jualan hari ini! 💪`;\n\nreturn [{ json: { laporan, totalOrder: orderKemarin.length, totalItem, totalPendapatan } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ffece1eb-d464-4e41-a42c-b864db0f9c0b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fonnte.com/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization ",
+              "value": "YOUR_FONNTE_TOKEN_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "YOUR_OWNER_WHATSAPP_NUMBER_HERE"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.laporan }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "9899f7f6-a11c-4bed-afd2-ad903b105403",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "94d884d0-8a83-4cc6-93e4-d46605ade73c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df3739d2129dfd9bde2166d3e546bd58774ca443a10bcda350a14749f0da3fbe"
+  },
+  "id": "ofsvg8MX2SSSLJmy",
+  "tags": []
+}
